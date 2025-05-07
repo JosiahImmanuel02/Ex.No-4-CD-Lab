@@ -19,57 +19,61 @@ To write a YACC program to recognize a valid variable which starts with a letter
 ## EX4.l
 ```
 %{
-#include "y.tab.h"
+#include "expr4.tab.h"
 %}
 
 %%
 
-"int" { return INT; } 
-"float" { return FLOAT; }
-"double" { return DOUBLE; }
-
-[a-zA-Z][a-zA-Z0-9]* {
-printf("\nIdentifier is %s", yytext); return ID;
-}
-
-. { return yytext[0]; }
-
-\n { return 0; }
+[a-zA-Z][a-zA-Z0-9]*    { return VARIABLE; }
+.|\n                    { return INVALID; }
 
 %%
-
-int yywrap() 
-{ 
-return 1;
+int yywrap() {
+    return 1;
 }
+
+
 ```
 
 ## EX4.y
 ```
 %{
 #include <stdio.h>
-/* This YACC program is for recognizing the Expression */
+#include <stdlib.h>
+
+int yylex(void);
+void yyerror(const char *s);
 %}
 
-%token ID INT FLOAT DOUBLE
-%% D: T L;
-L: L ',' ID   | ID;
-
-T: INT | FLOAT | DOUBLE;
+%token VARIABLE INVALID
 
 %%
-extern FILE *yyin; int main() {
-do {
-yyparse();
-} while (!feof(yyin)); return 0;
+
+input:
+    VARIABLE { printf("Valid variable name\n"); }
+  | INVALID  { printf("Invalid variable name\n"); }
+  ;
+
+%%
+
+int main() {
+    printf("Enter a variable name: ");
+    yyparse();
+    return 0;
 }
 
-void yyerror(char *s) { 
+void yyerror(const char *s) {
+    // we handle invalid input in the grammar, so this can stay empty
 }
+
+
 ```
 ## Output
 
-![Screenshot 2025-04-23 130816](https://github.com/user-attachments/assets/3f0ed602-faf1-44e8-8ba4-3bd78bc581e5)
+
+![Screenshot 2025-05-07 051354](https://github.com/user-attachments/assets/da3eeb00-7dfc-4e02-ab68-71086be8602b)
+
+
 
 ## Result
 A YACC program to recognize a valid variable which starts with a letter followed by any number of letters or digits is executed successfully and the output is verified.
